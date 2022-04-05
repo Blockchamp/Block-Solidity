@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "./ERC20Interface.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import '@openzeppelin/contracts/access/Ownable.sol';
 import "./SafeMath.sol";
 
-contract NestedToken is ERC20Interface, SafeMath {
-    string public name;
-    string public symbol;
-    uint8 public decimals;
+contract NestedToken is ERC20, Ownable {
 
+    uint8 public _decimals;
     uint256 public _totalSupply;
 
     mapping(address => uint) balances;
@@ -16,15 +15,17 @@ contract NestedToken is ERC20Interface, SafeMath {
 
    // Constrctor function
      
-      constructor() {
-        name = "NestedToken";
-        symbol = "NST";
-        decimals = 18;
-        _totalSupply = 100000000000000000000000000;
+      constructor()  ERC20('NestedToken', 'NST'){
+        _decimals = 18;
+        _totalSupply = 1000000000000000000000;
 
         balances[msg.sender] = _totalSupply;
         emit Transfer(address(0), msg.sender, _totalSupply);
     }
+
+      function mint(address _to, uint256 _value) external onlyOwner {
+    _mint(_to, _value);
+        }
 
     function totalSupply() public override view returns (uint) {
         return _totalSupply  - balances[address(0)];
@@ -45,17 +46,18 @@ contract NestedToken is ERC20Interface, SafeMath {
     }
 
     function transfer(address to, uint tokens) public override returns (bool success) {
-        balances[msg.sender] = safeSub(balances[msg.sender], tokens);
-        balances[to] = safeAdd(balances[to], tokens);
+        balances[msg.sender] -= tokens;
+        balances[to] += tokens;
         emit Transfer(msg.sender, to, tokens);
         return true;
     }
 
     function transferFrom(address from, address to, uint tokens) public override returns (bool success) {
-        balances[from] = safeSub(balances[from], tokens);
-        allowed[from][msg.sender] = safeSub(allowed[from][msg.sender], tokens);
-        balances[to] = safeAdd(balances[to], tokens);
+        balances[from] -= tokens;
+        allowed[from][msg.sender] -= tokens;
+        balances[to] += tokens;
         emit Transfer(from, to, tokens);
         return true;
     }
+   
 }
