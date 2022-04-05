@@ -3,7 +3,6 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import '@openzeppelin/contracts/access/Ownable.sol';
-import "./SafeMath.sol";
 
 contract NestedToken is ERC20, Ownable {
 
@@ -17,14 +16,14 @@ contract NestedToken is ERC20, Ownable {
      
       constructor()  ERC20('NestedToken', 'NST'){
         _decimals = 18;
-        _totalSupply = 1000000000000000000000;
+        _totalSupply = 1000 * 10**18;
 
         balances[msg.sender] = _totalSupply;
         emit Transfer(address(0), msg.sender, _totalSupply);
     }
 
       function mint(address _to, uint256 _value) external onlyOwner {
-    _mint(_to, _value);
+             _mint(_to, _value);
         }
 
     function totalSupply() public override view returns (uint) {
