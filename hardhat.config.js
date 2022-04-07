@@ -3,7 +3,7 @@ require("dotenv").config({ path: ".env" });
 
 const ALCHEMY_API_KEY_URL = process.env.ALCHEMY_API_KEY_URL;
 
-const ROPSTEN_PRIVATE_KEY = process.env.ROPSTEN_PRIVATE_KEY;
+const RINKEBY_PRIVATE_KEY = process.env.RINKEBY_PRIVATE_KEY;
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -26,9 +26,9 @@ module.exports = {
   solidity: "0.8.10",
   gasPrice: "200",
   networks: {
-    ropsten: {
+    rinkeby: {
       url: ALCHEMY_API_KEY_URL,
-      accounts: [ROPSTEN_PRIVATE_KEY],
+      accounts: [RINKEBY_PRIVATE_KEY],
     },
   },
 };
