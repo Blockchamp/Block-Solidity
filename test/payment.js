@@ -8,8 +8,10 @@ use(solidity);
 
 describe("Payment",  function (){
 
-    let buyTicket;
+    let payment;
     let NestToken;
+    let owner;
+    let addr1;
 
     describe("buyTicket()", function () {
         it("Should buy Ticket and our balance should go up...", async function () {
@@ -73,13 +75,18 @@ describe("Payment",  function (){
         });
       });
       
-      if(process.env.CONTRACT_ADDRESS){
-        // live contracts, token already deployed
-      }else{
-        it("Should deploy NestToken", async function () {
-          const YourToken = await ethers.getContractFactory("YourToken");
-          yourToken = await NestToken.deploy();
+      beforeEach(async function() {
+        const NestToken = await hre.ethers.getContractFactory("NestToken");
+        nestToken = await NestToken.deploy();
+        await nestToken.deployed();
+
+        [owner, addr1] = await ethers.getSigners();
+
+
+        it("Should successfuly deploy", async function () {
+          console.log("success!");
         });
+
         describe("totalSupply()", function () {
     
           it("Should have a total supply of at least 1000", async function () {
