@@ -7,8 +7,11 @@ import "./NestToken.sol";
 contract Payment is Ownable {
     event SendToken(address recipient, uint256 amount, address adminAddresses);
     event BuyTicket(address recipient, uint256 amount, string name);
+    uint256 tokensAwarded;
+    uint256 customersAwarded;
 
     mapping(address => uint256) public Payments;
+    mapping(address => uint256) public Rewards;
     mapping(address => bool) public adminAddresses;
 
     NestToken public nestedToken;
@@ -45,6 +48,11 @@ contract Payment is Ownable {
     // ToDo: create a sendToken() function:
     function sendToken(address addr, uint256 amount) public onlyOwner {
         nestedToken.transfer(addr, amount);
+        Rewards[msg.sender] = Rewards[msg.sender] + amount;
+        tokensAwarded = tokensAwarded + amount;
+        if (Rewards[msg.sender] == 0) {
+            customersAwarded += 1;
+        }
         emit SendToken(addr, amount, msg.sender);
     }
 
@@ -64,6 +72,10 @@ contract Payment is Ownable {
     function withdraw() public onlyOwner {
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
         require(success, "Failed to withdraw money");
+    }
+
+    function getEthAmount() public view returns (uint256) {
+        return address(this).balance;
     }
 
     // Add the `receive()` special function that receives eth and calls ()
