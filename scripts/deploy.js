@@ -12,11 +12,16 @@ async function main() {
   // If this script is run directly using `node` you may want to call compile
   // manually to make sure everything is compiled
   // await hre.run('compile');
+  /* const Token = await hre.ethers.getContractFactory("NestToken");
+  const token = await Token.deploy();
 
+  await token.deployed();
+
+  console.log("Token deployed to:", token.address); */
   // We get the contract to deploy
   const Payment = await hre.ethers.getContractFactory("Payment");
   const payment = await Payment.deploy(
-    "0x5C672245e1046f4c302dec348f10Df09E45e855b"
+    "0xD2668EF608D7D865FD16308A2f38fc3d15024Ff0"
   );
 
   await payment.deployed();
