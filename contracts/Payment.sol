@@ -17,10 +17,14 @@ contract Payment is Ownable {
     event RemoveAdmin(address recipient);
     uint256 tokensAwarded;
     uint256 customersAwarded;
+    uint256 basePrice = 0.001 ether;
+    uint256 tokenReward = 5 * 10**18;
+    bool status = false;
 
     mapping(address => uint256) public Payments;
     mapping(address => uint256) public Rewards;
     mapping(address => bool) public adminAddresses;
+    mapping(address => bool) public rewardAddresses;
 
     NestToken public nestedToken;
 
@@ -31,6 +35,11 @@ contract Payment is Ownable {
 
     modifier onlyAdmin() {
         require(adminAddresses[msg.sender] == true, "Not an admin");
+        _;
+    }
+
+    modifier onlyWhenContractIsNotOnPause() {
+        require(status == false, "Contract is on pause");
         _;
     }
 
@@ -65,7 +74,11 @@ contract Payment is Ownable {
     }
 
     // ToDo: create a sendToken() function:
-    function sendToken(address addr, uint256 amount) public onlyOwner {
+    function sendToken(address addr, uint256 amount)
+        public
+        onlyAdmin
+        onlyWhenContractIsNotOnPause
+    {
         _sendToken(addr, amount);
         emit SendToken(addr, amount, msg.sender);
     }
@@ -74,6 +87,7 @@ contract Payment is Ownable {
     function sendToMultiple(address[] memory arrOfAddresses, uint256 amount)
         public
         onlyAdmin
+        onlyWhenContractIsNotOnPause
         returns (bool)
     {
         for (uint256 i = 0; i < arrOfAddresses.length; i++) {
@@ -83,11 +97,53 @@ contract Payment is Ownable {
         return true;
     }
 
+    function rewardCustomer(address addr)
+        external
+        onlyWhenContractIsNotOnPause
+        returns (bool)
+    {
+        if (Payments[addr] >= basePrice) {
+            _sendToken(addr, tokenReward);
+            rewardAddresses[addr] = true;
+        }
+        return true;
+    }
+
     // ToDo: create a withdraw() function that lets the owner withdraw ETH
     function withdraw() public onlyOwner {
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
         require(success, "Failed to withdraw money");
         emit Withdraw(success);
+    }
+
+    function setBasePrice(uint256 price)
+        public
+        onlyAdmin
+        onlyWhenContractIsNotOnPause
+        returns (bool)
+    {
+        basePrice = price;
+        return true;
+    }
+
+    function setTokenReward(uint256 reward)
+        public
+        onlyAdmin
+        onlyWhenContractIsNotOnPause
+        returns (bool)
+    {
+        tokenReward = reward;
+        return true;
+    }
+
+    function pauseContract() public onlyOwner returns (bool) {
+        status = true;
+        return true;
+    }
+
+    function startContract() public onlyOwner returns (bool) {
+        status = false;
+        return true;
     }
 
     function getEthAmount() public view returns (uint256) {

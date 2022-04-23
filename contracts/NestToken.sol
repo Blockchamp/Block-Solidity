@@ -6,15 +6,21 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract NestToken is ERC20, Ownable {
     uint256 public _totalSupply;
+    address private payC;
 
     mapping(address => uint256) balances;
     mapping(address => mapping(address => uint256)) allowed;
 
+    event SellToken(
+        uint256 amountOfToken,
+        uint256 amountOfEther,
+        address senderAddress
+    );
+
     // Constrctor function
 
     constructor() ERC20("NestToken", "NST") {
-        _totalSupply = 1000 * 10**18;
-
+        _totalSupply = 1000000 * 10**18;
         balances[msg.sender] = _totalSupply;
         emit Transfer(address(0), msg.sender, _totalSupply);
     }
@@ -76,5 +82,28 @@ contract NestToken is ERC20, Ownable {
         balances[to] += tokens;
         emit Transfer(from, to, tokens);
         return true;
+    }
+
+    function setPaymentContract(address addr) public onlyOwner returns (bool) {
+        payC = addr;
+        return true;
+    }
+
+    function getPaymentContract() public view onlyOwner returns (address) {
+        return payC;
+    }
+
+    function sellTokens(uint256 amount) public {
+        uint256 ethPerTokens = 10000;
+
+        uint256 totalEther = amount / ethPerTokens;
+
+        transfer(payC, amount);
+
+        (bool success, ) = msg.sender.call{value: totalEther}("");
+
+        require(success == true, "Payment failed");
+
+        emit SellToken(amount, totalEther, msg.sender);
     }
 }
